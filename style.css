@@ -1,0 +1,121 @@
+body {
+  font-family: Arial, sans-serif;
+  background: #f5f1ea;
+  padding: 40px;
+}
+
+h1 {
+  text-align: center;
+  font-size: 36px;
+  margin-bottom: 14px;
+}
+
+.instruction {
+  max-width: 780px;
+  margin: 0 auto 28px;
+  text-align: center;
+  font-size: 15px;
+  line-height: 1.5;
+  color: #555;
+}
+
+table {
+  border-collapse: collapse;
+  margin: auto;
+  background: white;
+}
+
+th, td {
+  border: 1px solid #333;
+  width: 130px;
+  min-height: 70px;
+  text-align: center;
+  vertical-align: top;
+}
+
+th {
+  height: 50px;
+  font-size: 16px;
+  font-weight: normal;
+  vertical-align: middle;
+}
+
+td:first-child {
+  width: 220px;
+  font-size: 14px;
+  font-weight: bold;
+  background: #eeeeee;
+  vertical-align: middle;
+}
+
+.red {
+  background: #ff9999;
+}
+
+.orange {
+  background: #ffc07a;
+}
+
+.yellow {
+  background: #ffe66d;
+}
+
+.pale {
+  background: #fff2a8;
+}
+
+.white {
+  background: #ffffff;
+}
+
+.rating-cell {
+  padding: 8px;
+}
+
+.emoji-list {
+  min-height: 34px;
+  font-size: 24px;
+  line-height: 1.4;
+  word-break: break-word;
+  margin-bottom: 6px;
+}
+
+.input-area {
+  display: flex;
+  gap: 4px;
+  justify-content: center;
+  align-items: center;
+}
+
+input {
+  width: 58px;
+  border: 1px solid #aaa;
+  border-radius: 12px;
+  text-align: center;
+  font-size: 22px;
+  padding: 4px;
+  background: #fffdf8;
+}
+
+input:focus {
+  outline: 2px solid #ffc07a;
+}
+
+button {
+  border: 1px solid #333;
+  background: white;
+  border-radius: 12px;
+  cursor: pointer;
+  padding: 6px 8px;
+  font-size: 12px;
+}
+
+button:hover {
+  background: #eeeeee;
+}
+
+.small-note {
+  font-size: 10px;
+  color: #888;
+  margin-top: 4px;
+}
