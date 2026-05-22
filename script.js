@@ -25,7 +25,6 @@ const tableBody = document.getElementById("table-body");
 const foods = [
   "YAB YOP",
   "PART DE BROOKIE",
-  "GEOEGET",
   "SALAD SODEBO",
   "SALAD DAUNAT",
   "RADIATORI SODEBO",
