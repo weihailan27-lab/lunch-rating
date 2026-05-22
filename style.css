@@ -25,7 +25,8 @@ table {
   background: white;
 }
 
-th, td {
+th,
+td {
   border: 1px solid #333;
   width: 130px;
   min-height: 70px;
@@ -118,4 +119,37 @@ button:hover {
   font-size: 10px;
   color: #888;
   margin-top: 4px;
+}
+
+#result-box {
+  max-width: 780px;
+  margin: 32px auto 0;
+  padding: 20px;
+  background: white;
+  border: 1px solid #333;
+  border-radius: 20px;
+  text-align: center;
+  font-size: 18px;
+  line-height: 1.7;
+}
+
+.falling-emoji {
+  position: fixed;
+  top: -40px;
+  z-index: 9999;
+  pointer-events: none;
+  font-size: 32px;
+  animation: fallDown 2.8s linear forwards;
+}
+
+@keyframes fallDown {
+  0% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateY(110vh) rotate(360deg);
+    opacity: 0;
+  }
 }
