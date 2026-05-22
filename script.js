@@ -8,7 +8,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-database.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyCiFbTCMBbmw-1NSX8coyJ9UYx5xZRpzyg",
+    apiKey: "AIzaSyCiFbTCMBbmw-1NSX8coyJ9UYx5xZRpzyg",
   authDomain: "lunch-rating.firebaseapp.com",
   projectId: "lunch-rating",
   storageBucket: "lunch-rating.firebasestorage.app",
@@ -21,6 +21,8 @@ const app = initializeApp(firebaseConfig);
 const database = getDatabase(app);
 
 const tableBody = document.getElementById("table-body");
+const bestFoodText = document.getElementById("best-food");
+const worstFoodText = document.getElementById("worst-food");
 
 const foods = [
   "YAB YOP",
@@ -55,9 +57,25 @@ const levels = [
   "eclate"
 ];
 
-/* 提取真正的 emoji */
-function extractEmoji(text) {
+const levelScores = {
+  masterclass: 4,
+  incroyable: 3,
+  valide: 2,
+  ordinaire: 1,
+  eclate: 0
+};
 
+const fallingEmojiByLevel = {
+  masterclass: "🥰",
+  incroyable: "😋",
+  valide: "👍",
+  ordinaire: "🤔",
+  eclate: "💩"
+};
+
+let allRatings = {};
+
+function extractEmoji(text) {
   const emojiRegex =
     /(?:\p{Extended_Pictographic}|\p{Regional_Indicator})(?:\uFE0F|\u200D|\p{Emoji_Modifier}|(?:\p{Extended_Pictographic}|\p{Regional_Indicator}))*/gu;
 
@@ -67,7 +85,6 @@ function extractEmoji(text) {
 }
 
 function isEmojiOnly(text) {
-
   const cleaned = extractEmoji(text);
 
   return cleaned.length > 0 &&
@@ -78,7 +95,77 @@ function cleanEmoji(text) {
   return extractEmoji(text);
 }
 
+function createFallingEmoji(levelName) {
+  const emoji = fallingEmojiByLevel[levelName];
+
+  for (let i = 0; i < 12; i++) {
+    const falling = document.createElement("div");
+    falling.className = "falling-emoji";
+    falling.textContent = emoji;
+
+    falling.style.left = Math.random() * 100 + "vw";
+    falling.style.animationDelay = Math.random() * 0.4 + "s";
+    falling.style.fontSize = 24 + Math.random() * 18 + "px";
+
+    document.body.appendChild(falling);
+
+    setTimeout(() => {
+      falling.remove();
+    }, 3200);
+  }
+}
+
+function updateResults() {
+  let bestFood = null;
+  let worstFood = null;
+
+  let bestScore = -Infinity;
+  let worstScore = Infinity;
+
+  foods.forEach((food, foodIndex) => {
+    let score = 0;
+    let voteCount = 0;
+
+    levels.forEach(level => {
+      const levelData = allRatings?.[foodIndex]?.[level];
+
+      if (!levelData) {
+        return;
+      }
+
+      const votes = Object.values(levelData)
+        .filter(item => item.emoji);
+
+      score += votes.length * levelScores[level];
+      voteCount += votes.length;
+    });
+
+    if (voteCount === 0) {
+      return;
+    }
+
+    if (score > bestScore) {
+      bestScore = score;
+      bestFood = food;
+    }
+
+    if (score < worstScore) {
+      worstScore = score;
+      worstFood = food;
+    }
+  });
+
+  bestFoodText.textContent = bestFood
+    ? `👑：${bestFood}`
+    : "👑：en attente des votes...";
+
+  worstFoodText.textContent = worstFood
+    ? `💩：${worstFood}`
+    : "💩：en attente des votes...";
+}
+
 function createRatingCell(foodIndex, levelIndex) {
+  const levelName = levels[levelIndex];
 
   const cell = document.createElement("td");
   cell.className = "rating-cell";
@@ -90,7 +177,6 @@ function createRatingCell(foodIndex, levelIndex) {
   inputArea.className = "input-area";
 
   const input = document.createElement("input");
-
   input.type = "text";
   input.maxLength = 12;
   input.placeholder = "emoji";
@@ -109,16 +195,10 @@ function createRatingCell(foodIndex, levelIndex) {
   cell.appendChild(inputArea);
   cell.appendChild(note);
 
-  const ratingPath =
-    `ratings/${foodIndex}/${levels[levelIndex]}`;
-
-  const ratingRef =
-    ref(database, ratingPath);
-
-  /* 实时读取数据库 */
+  const ratingPath = `ratings/${foodIndex}/${levelName}`;
+  const ratingRef = ref(database, ratingPath);
 
   onValue(ratingRef, snapshot => {
-
     const data = snapshot.val();
 
     if (!data) {
@@ -130,23 +210,14 @@ function createRatingCell(foodIndex, levelIndex) {
       .map(item => item.emoji)
       .filter(Boolean);
 
-    emojiList.textContent =
-      values.join(" ");
+    emojiList.textContent = values.join(" ");
   });
 
-  /* 提交 */
-
   function submitEmoji() {
-
-    const emoji =
-      cleanEmoji(input.value);
+    const emoji = cleanEmoji(input.value);
 
     if (!isEmojiOnly(emoji)) {
-
-      alert(
-        "Merci d’entrer uniquement des emoji !"
-      );
-
+      alert("Merci d’entrer uniquement des emoji !");
       input.value = "";
       return;
     }
@@ -156,64 +227,46 @@ function createRatingCell(foodIndex, levelIndex) {
       time: Date.now()
     });
 
+    createFallingEmoji(levelName);
+
     input.value = "";
   }
 
-  button.addEventListener(
-    "click",
-    submitEmoji
-  );
+  button.addEventListener("click", submitEmoji);
 
-  input.addEventListener(
-    "keydown",
-    event => {
-
-      if (event.key === "Enter") {
-        submitEmoji();
-      }
+  input.addEventListener("keydown", event => {
+    if (event.key === "Enter") {
+      submitEmoji();
     }
-  );
+  });
 
-  /* 自动过滤非 emoji */
-
-  input.addEventListener(
-    "input",
-    () => {
-
-      const onlyEmoji =
-        cleanEmoji(input.value);
-
-      input.value = onlyEmoji;
-    }
-  );
+  input.addEventListener("input", () => {
+    const onlyEmoji = cleanEmoji(input.value);
+    input.value = onlyEmoji;
+  });
 
   return cell;
 }
 
-/* 创建表格 */
-
 foods.forEach((food, foodIndex) => {
+  const row = document.createElement("tr");
 
-  const row =
-    document.createElement("tr");
-
-  const labelCell =
-    document.createElement("td");
-
+  const labelCell = document.createElement("td");
   labelCell.textContent = food;
 
   row.appendChild(labelCell);
 
   levels.forEach((level, levelIndex) => {
-
-    const cell =
-      createRatingCell(
-        foodIndex,
-        levelIndex
-      );
-
+    const cell = createRatingCell(foodIndex, levelIndex);
     row.appendChild(cell);
   });
 
   tableBody.appendChild(row);
+});
+
+const allRatingsRef = ref(database, "ratings");
+
+onValue(allRatingsRef, snapshot => {
+  allRatings = snapshot.val() || {};
+  updateResults();
 });
